@@ -233,7 +233,7 @@ def add_task():
         Include 'No' to indicate if the task is complete.'''
         # -- Default value for completed (task) is 'False' which turns to 'No' when saving into task.txt file
         new_task = {
-            "id": id, "username": task_username, "title": task_title, "description": task_description,
+            "id": id_num, "username": task_username, "title": task_title, "description": task_description,
             "due_date": due_date_time, "assigned_date": curr_date, "completed": False}
 
         # -- Calls read_task() function to retrieve all tasks into a dictionary

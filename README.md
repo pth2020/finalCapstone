@@ -1,6 +1,6 @@
 Project name: task_manager
 
-Description: task_manager is a project that holds multiple files such as task_manager.py, tasks.txt, user.txt, task_overview.txt and user_overview.txt.
+* Description: * task_manager is a project that holds multiple files such as task_manager.py, tasks.txt, user.txt, task_overview.txt and user_overview.txt.
              task_manager.py enables a user to register users, add(assign) tasks to users, view ones tasks, view all tasks, generate reports and view statistics.
              All the text files function as databases to store data (username & password on users (user.txt), tasks assigned to users (tasks.txt), all transactions
              on tasks (task_overview.txt) such as due date, completed and incomplete tasks and all transactions on users (user_overview) such as numbers percentage of 

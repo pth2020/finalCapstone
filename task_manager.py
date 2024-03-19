@@ -15,7 +15,7 @@ DATETIME_STRING_FORMAT = "%Y-%m-%d"
 today = datetime.today()
 
 
-# -- Line marker function for an output
+# Line marker function for an output
 def line_marker(num):
     line = ''
     if num == 30:
@@ -35,7 +35,7 @@ def login():
     dictionary that stores/reads usernames and passwords from user.txt file
     to allow a user to login
     """
-    # -- Dictionary that stores usernames (keys) and passwords (values)
+    # Dictionary that stores usernames (keys) and passwords (values)
     username_password = read_users()
 
     # -- Logged-in user (access to certain functions is restricted to non admin usernames)
@@ -52,9 +52,11 @@ def login():
             print("Three unsuccessful login attempts!")
             print("Goodbye")
             break
-            # -- User enters username and password
+        
+        # -- User enters username and password
         curr_user_input = input("Username: ")
         curr_pass_input = input("Password: ")
+        
         # -- User restricted from access if username is non-existent
         # or if a password is entered incorrectly
         if curr_user_input not in username_password.keys():
@@ -66,6 +68,7 @@ def login():
         else:
             print("Login Successful!")
             logged_in = True
+            
             # -- Once user is successfully logged on, menu function is called
             menu()
 
@@ -101,14 +104,14 @@ def read_users():
     return username_password_dict
 
 
-# -- Function that checks for duplicate usernames when registering users
-def check_duplicate_user(new_user):
+# -- Function to check if user already exists
+def check_user(new_user):
     # -- Making a call to read_users() to get username/password dict
     username_password = read_users()
     for user in username_password:
         if new_user == user:
             return True
-
+        
 
 # -- Function to confirm if passwords entered twice match
 def confirm_password(new_password, conf_password):
@@ -139,7 +142,9 @@ def reg_user():
 
         # - Request input of a new username
         new_username = input("New Username: ")
-        if check_duplicate_user(new_username):
+        
+        # -- Checking if user already exists
+        if check_user(new_username):
             print("\nUser already exists.\n")
             break
 
@@ -231,7 +236,8 @@ def add_task():
         curr_date = date.today()
         ''' Add the data to the file task.txt and
         Include 'No' to indicate if the task is complete.'''
-        # -- Default value for completed (task) is 'False' which turns to 'No' when saving into task.txt file
+        # -- Default value for completed (task) is 'False' 
+        # which turns to 'No' when saving into task.txt file
         new_task = {
             "id": id_num, "username": task_username, "title": task_title, "description": task_description,
             "due_date": due_date_time, "assigned_date": curr_date, "completed": False}
@@ -264,7 +270,7 @@ def view_all_tasks():
 
     # -- Print all tasks in a table format
     # -- Headers for table
-    headers = ["ID", "User", "Task", "Assigned to", "Due Date", "Date Assigned", "Task Description"]
+    headers = ["ID", "User", "Task", "Assigned to", "Due Date", "Date Assigned", "Complete"]
 
     # -- Initialise a '2D to be' list for table data
     all_data = []
@@ -280,7 +286,7 @@ def view_all_tasks():
 
 
 # -- Function to verify if user exists in user.txt file
-def user_verifier(uname, password):
+def user_credential_verifier(uname, password):
     # -- To authenticate users if their username and password are registered
     user_verified = False
 
@@ -288,8 +294,9 @@ def user_verifier(uname, password):
     username_password = read_users()
 
     try:
+        # -- If username exists
         if uname in username_password.keys():
-            # -- Verifying username and password
+            # -- if username matches password
             if username_password[uname] == password:
                 user_verified = True
     except KeyError:
@@ -313,7 +320,7 @@ def view_my_task():
         password_entered = input("Enter your password: ")
 
         # -- If username and password are verified it exists loop
-        if user_verifier(username_entered, password_entered):
+        if user_credential_verifier(username_entered, password_entered):
             break
         else:
             print("Username doesn't exist or one or both of username and password is/are incorrect")
@@ -329,7 +336,7 @@ def view_my_task():
         if len(my_task_list) == 0:
             print(f"\nNo tasks assigned to {username_entered} yet.\n")
         else:
-            headers = ["ID", "Assigned to", "Task", "Task Description", "Due Date", "Date Assigned", "Task completed"]
+            headers = ["ID", "Assigned to", "Task", "Task Description", "Due Date", "Date Assigned", "Complete"]
 
             # -- Initialise a '2D to be' list for table data
             all_data = []
@@ -343,7 +350,7 @@ def view_my_task():
             print()
 
             # -- Calls update_task_menu and provide user with different options
-        update_my_task_menu(my_task_list)
+            update_my_task_menu(my_task_list)
     else:
         print("\nToo many failed authentication attempts.\n")
 
@@ -351,12 +358,20 @@ def view_my_task():
 def update_my_task_menu(my_t_list):
     # -- Task id number
     task_id_num = -1
+    
+    #-- cheking if editing task is needed
+    checking_task = True
 
     while True:
 
         try:
             # -- User prompted to select id number of their task to edit
-            chosen_task_number = int(input("To edit task enter its id number: "))
+            chosen_task_number = int(input("To edit task enter its id number or type 0 to exit: "))
+            
+            #-- To exit loop if editing task is not required
+            if chosen_task_number == 0: 
+                checking_task = False
+                break
 
             for i in range(len(my_t_list)):
                 if int((my_t_list[i])['id']) == chosen_task_number:
@@ -376,55 +391,58 @@ def update_my_task_menu(my_t_list):
                 print("Incorrect input. Try again")
         except ValueError:
             print("Task id is empty.Try again")
+            
+    if checking_task:
+        
+        # -- User selects an option from task menu
+        edit_option = input("Choose your option: ")
 
-    # -- User selects an option from task menu
-    edit_option = input("Choose your option: ")
+        # -- Option to set a selected task as completed
+        if edit_option == 'co':
+            update_to_complete_task(my_t_list, task_id_num)
 
-    # -- Option to set a selected task as completed
-    if edit_option == 'co':
-        update_to_complete_task(my_t_list, task_id_num)
-
-    # -- Option to edit username and/or due date in a task
-    elif edit_option == 'ed':
-        while True:
-            task_edit_menu = '''
-                Select your option:
+        # -- Option to edit username and/or due date in a task
+        elif edit_option == 'ed':
+            while True:
+                task_edit_menu = '''
+                    Select your option:
                     1 - Edit username
                     2 - Edit due date
                     3 - Return to main menu 
                 '''
-            print(task_edit_menu)
+                print(task_edit_menu)
 
-            task_edit_option = int(input("Choose your option:"))
-            # -- Filter user's task into a list using task number and completeness criteria
-            task_to_edit = [t for t in my_t_list if t['id'] == str(task_id_num) and not t['completed']]
+                task_edit_option = int(input("Choose your option:"))
+                # -- Filter user's task into a list using task number and completeness criteria
+                task_to_edit = [t for t in my_t_list if t['id'] == str(task_id_num) and not t['completed']]
 
-            # -- List is non-empty - meaning not completed
-            if task_to_edit:
-                task_id = int((task_to_edit[0])['id'])
+                # -- List is non-empty - meaning not completed
+                if task_to_edit:
+                    task_id = int((task_to_edit[0])['id'])
 
-            # -- List is empty - meaning it is already completed
-            else:
-                print("\nTask cannot be edited. It is completed.\n")
-                break
+                # -- List is empty - meaning it is already completed
+                else:
+                    print("\nTask cannot be edited. It is completed.\n")
+                    break
 
                 # -- To edit username
-            if task_edit_option == 1:
-                update_username_task(task_to_edit, task_id)
+                if task_edit_option == 1:
+                    # -- update username associated with the task chosen
+                    update_username_task(task_to_edit, task_id)
 
-            # -- To edit due date
-            elif task_edit_option == 2:
-                update_due_date_task(task_to_edit, task_id)
+                # -- To edit due date
+                elif task_edit_option == 2:
+                    update_due_date_task(task_to_edit, task_id)
 
-            elif task_edit_option == 3:
-                print("\nReturning to main menu.\n")
-                break
-            else:
-                print("Invalid option")
-    elif edit_option == 'ex':
-        print("\nReturning to main menu...\n")
-    else:
-        print("\nIncorrect input. Start all over again.\n")
+                elif task_edit_option == 3:
+                    print("\nReturning to main menu.\n")
+                    break
+                else:
+                    print("Invalid option")
+        elif edit_option == 'ex':
+            print("\nReturning to main menu...\n")
+        else:
+            print("\nIncorrect input. Start all over again.\n")
 
 
 def update_to_complete_task(task_list, task_number):
@@ -454,16 +472,24 @@ def update_to_complete_task(task_list, task_number):
 def update_username_task(task_edit_list, t_id):
     read_task_list = read_tasks()
     edit_user = input("Enter new username: ")
-    # -- Edit username for a selected task
-    (task_edit_list[0])['username'] = edit_user
+    
+    # -- Check if username exists first
+    if check_user(edit_user):
+        # -- Edit username for a selected task
+        (task_edit_list[0])['username'] = edit_user
 
-    # -- Edit username in the whole list
-    (read_task_list[t_id - 1])['username'] = edit_user
+        # -- Edit username in the whole list
+        (read_task_list[t_id - 1])['username'] = edit_user
 
-    # -- Assign updated read_task_list to edited_task_list
-    # and call update_task_file to update data in the task.txt file
-    edited_task_list = read_task_list
-    update_task_file(edited_task_list)
+        # -- Assign updated read_task_list to edited_task_list
+        # and call update_task_file to update data in the task.txt file
+        edited_task_list = read_task_list
+        update_task_file(edited_task_list)
+        
+        print("User updated successfully!")
+        
+    else:
+        print("User doesn't exist!")
 
 
 def update_due_date_task(task_edit_list, t_id):
@@ -499,40 +525,137 @@ def update_task_file(task_list):
 
 
 def display_statistics():
-    """If the user is an admin they can display statistics about number of users
-    and tasks."""
-
+    """If the user is an admin they can display statistics on users and tasks."""
+        
+    display_stat_menu = """
+        Select what you want to view:
+            1. Statistics on users
+            2. Statistics on Tasks
+            0. Return to main menu 
+    :"""
+    while True:
+        print("~~~~~~  Report  ~~~~~~")
+        user_option = input(display_stat_menu)
+        if user_option == '1':
+            display_users_stats()
+        elif user_option == '2':
+            display_tasks_stats()
+        elif user_option == '0':
+            break
+        else:
+            print("Incorrect choice.Try again")
+    
+    
+def display_users_stats():
+    user_overview_list = []
+    
     user = input("Please enter your username: ")
     password = input("Please enter your password: ")
-
-    # -- Read all users from user.txt
-    username_password = read_users()
-
-    if not username_password:
-        print("Create users first\n")
-        reg_user()
-
-    # -- Read all tasks from task.txt
-    task_list = read_tasks()
-
-    if not task_list:
-        print("create tasks first\n")
-        add_task()
-
+    
+    # -- If user is not an admin, they cannot view statistics
     if admin_privilege(user, password):
-        # -- Total number of users
-        num_users = len(username_password.keys())
-        # -- Total number of tasks
-        num_tasks = len(task_list)
+        # If there is no user_overview.txt file, write one with a default account
+        if not os.path.exists('user_overview.txt'):
+            with open('user_overview.txt', "w") as default_file:
+                pass
 
-        print(line_marker(40))
-        print(f"Number of users: \t\t {num_users}")
-        print(f"Number of tasks: \t\t {num_tasks}")
-        print(line_marker(40))
+        # Read in user_data from user_overview.txt
+        with open('user_overview.txt', 'r') as user_file:
+            user_overview_data = user_file.read().split("\n")
+            user_overview_data = [u for u in user_overview_data if u != ""]
+        
+        for u_str in user_overview_data:
+            curr_u = {}
+            # Split by semicolon and manually add each component
+            user_components = u_str.split(";")
+            curr_u['user'] = user_components[0]
+            curr_u['User_total_tasks'] = user_components[1]
+            curr_u['User_completed_tasks'] = user_components[2]
+            curr_u['user_total_tasks_percent'] = user_components[3]
+            curr_u['user_completed_tasks_percent'] = user_components[4]
+            curr_u['user_incomplete_tasks_percent'] = user_components[5]           
+            curr_u['user_incomplete_tasks_overdue_percent'] = user_components[6]
+        
+            user_overview_list.append(curr_u)
+            
+        if user_overview_list:
+            #--Display user overview data in table format
+            headers = ['User','Tot tasks','Compl tasks','Tot tasks %','Compl %','Incompl %','Incompl & Overdue %']
+        
+            # -- Initialise a '2D array' list for table data
+            all_user_overview = []
+        
+            for x in user_overview_list:
+                all_user_overview.append(list(x.values()))
 
+            # -- Initialise a tabulate object
+            table1 = tabulate(all_user_overview, headers=headers)
+            print()
+            print(table1)
+            print()
+            
+        else:
+            print("\nThere are no users assigned to any task yet!\n")
+        
     else:
-        print("Only admin has the right to view statistics on users and tasks.")
+        print("\nNo admin privellage to view statistics\n")
+        
+    
+def display_tasks_stats():
+    
+    task_overview_list = []    
+    
+    user = input("Please enter your username: ")
+    password = input("Please enter your password: ")
+    
+    # -- If user is not an admin, they cannot view statistics
+    if admin_privilege(user, password):
+        # If there is no user_overview.txt file, write one with a default account
+        if not os.path.exists('task_overview.txt'):
+            with open('task_overview.txt', "w") as default_file:
+                pass
 
+        # Read in user_data from user_overview.txt
+        with open('task_overview.txt', 'r') as task_file:
+            task_overview_data = task_file.read().split("\n")
+            task_overview_data = [u for u in task_overview_data if u != ""]
+            
+        for u_str in task_overview_data:
+            curr_t = {}
+            # Split by semicolon and manually add each component
+            user_components = u_str.split(";")
+            curr_t['total_tasks'] = user_components[0]
+            curr_t['completed_tasks'] = user_components[1]
+            curr_t['incomplete_tasks'] = user_components[2]
+            curr_t['overdue_tasks'] = user_components[3]
+            curr_t['incomplete_tasks_percent'] = user_components[4]
+            curr_t['overdue_task_percent'] = user_components[5]        
+        
+            task_overview_list.append(curr_t)
+            
+        if task_overview_data:
+            #--Display user overview data in table format
+            headers = ['Total Tasks','Completed Tasks','Incomplete Tasks','Overdue Tasks','Incomplete Tasks %','Overdue Tasks %']
+        
+            # -- Initialise a '2D array' list for table data
+            all_task_overview = []
+        
+            for x in task_overview_list:
+                all_task_overview.append(list(x.values()))
+
+            # -- Initialise a tabulate object
+            table1 = tabulate(all_task_overview, headers=headers)
+            print()
+            print(table1)
+            print()
+            
+        else:
+            print("\nThere are no tasks created yet!\n")
+        
+    else:
+        print("\nNo admin privellage to view statistics\n")
+            
+            
 
 def generate_tasks_report(t_list):
     """
@@ -587,23 +710,12 @@ def generate_tasks_report(t_list):
         task_report_file.write('\n'.join(task_report_to_write))
         print("Task report successfully added.")
 
-    # display task report on console
-    print("\n~~~~~~~~~~ Task Report ~~~~~~~~~~\n")
-    print(f"Total tasks: {total_tasks}")
-    print(f"Completed tasks: {completed_tasks}")
-    print(f"Incomplete tasks: {incomplete_tasks}")
-    print(f"Incomplete and overdue tasks: {overdue_tasks}")
-    print(f"Incomplete_tasks_percent: {round(incomplete_tasks_percent, 2)}%")
-    print(f"Overdue_task_percent: {round(overdue_task_percent, 2)}%")
-    print(line_marker(60))
-
-
+    
 # -- Function allows user to generate report on users.
 def generate_users_report(t_list):
+    
+    """Function receives all task list as an argument
     """
-    Function receives all task list as an argument
-    """
-
     # -- Dictionary with usernames and passwords
     username_password = read_users()
 
@@ -667,30 +779,17 @@ def generate_users_report(t_list):
                 str(t['user_incomplete_tasks_overdue_percent'])
             ]
             user_report_to_write.append(';'.join(str_attrs))
-        user_report_file.write(str(users) + ";" + str(total_tasks) + "\n")
         user_report_file.write('\n'.join(user_report_to_write))
         print("User report successfully added.")
 
-    headers = ["User", "Tot tasks", "Comp. tasks", "Tot tasks %", "Completed tasks %", "Incomplete task %",
-            "Incomplete & Overdue %"]
-
-    all_data = []
-
-    for x in user_report_list:
-        all_data.append(list(x.values()))
-
-    print("\n~~~~~~~~~~ User Report ~~~~~~~~~~\n")
-    print(tabulate(all_data, headers=headers))
-    print()
-
-
+    
 def generate_report():
     """
     Provides user options to view task report and/or user report
     """
     task_list = read_tasks()
     report_menu = """
-        Select the type of report you want to view:
+        Select the type of report you want to generate:
             1. Tasks report
             2. Users report
             0. Return to main menu 
